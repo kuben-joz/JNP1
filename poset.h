@@ -1,4 +1,6 @@
 
+#include<unordered_set>
+#include<unordered_map>
 
 /**
  * Tworzy nowy poset i zwraca jego identyfikator.
@@ -102,4 +104,3 @@ bool poset_test(unsigned long id, char const *value1, char const *value2);
  * @param id
  */
 void poset_clear(unsigned long id);
-

@@ -95,12 +95,12 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
   if(answ3 == NameMap.end()) return false;
   Key key2 = answ3->second;
 
-  auto elem1 = ElemMap[key1];
+  auto& elem1 = ElemMap[key1];
   auto answ4 = elem1.second.first.find(key2);
   if(answ4 != elem1.second.first.end()) return false;
 
-  auto elem2 = ElemMap[key2];
-  auto answ5 = elem2.second.first.find(key2);
+  auto& elem2 = ElemMap[key2];
+  auto answ5 = elem2.second.first.find(key1);
   if(answ5 != elem2.second.first.end()) return false;
 
   //iterate over set of smaller than elem1
@@ -111,7 +111,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
 
   elem1.second.second.emplace(key2);
   elem2.second.first.emplace(key1);
-  
+
   for(const auto& lowerElemKey: elem1.second.first){
     for(const auto& upperElemKey: elem2.second.second){
       ElemMap[lowerElemKey]->second.second.emplace(upperElemKey);
@@ -123,12 +123,19 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
 }
 
 bool poset_del(unsigned long id, char const *value1, char const *value2) {
-  //TODO
+  std :: string name1 (value1);
+  std :: string name2 (value2);
+
+  auto answ1 = posets.find(id);
+  if(answ1 == posets.end()) return false;
+  auto& ElemMap = get<0>(answ1->second);
+  auto& NameMap = get<1>(answ1->second);
+
+
 }
 
 bool poset_test(unsigned long id, char const *value1, char const *value2) {
   //TODO
-
 
 }
 

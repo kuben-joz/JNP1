@@ -106,6 +106,12 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
   //iterate over set of smaller than elem1
   //adding all bigger than elem2 as bigger
 
+  //iterate over set of bigger than elem2
+  //adding all smaller than elem1 as smaller
+
+  elem1.second.second.emplace(key2);
+  elem2.second.first.emplace(key1);
+  
   for(const auto& lowerElemKey: elem1.second.first){
     for(const auto& upperElemKey: elem2.second.second){
       ElemMap[lowerElemKey]->second.second.emplace(upperElemKey);
@@ -113,10 +119,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
     }
   }
 
-  //iterate over set of bigger than elem2
-  //adding all smaller than elem1 as smaller
-
-
+  return true;
 }
 
 bool poset_del(unsigned long id, char const *value1, char const *value2) {

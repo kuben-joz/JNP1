@@ -3,7 +3,9 @@
 namespace jnpzad2{
   using Key = uint64_t;
   //czy element znaleziony w mapie jest większy od posiadacza mapa
-  using Elem = std :: unordered_map<Key , std :: unordered_map<Key, std :: bool>>;
+  using Smaller = set<Key>;
+  using Bigger = set<Key>;
+  using Elem = std :: unordered_map<Key , std :: pair<Smaller, Bigger>>;
   using ElemMap = std :: unordered_map<Key, Elem>;
   using NameMap = std :: unordered_map<std :: string, Key>;
   using Poset = std :: tuple<ElemMap, NameMap, unsigned int>;

@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.13)
 project(JNP1)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 set(SOURCE_FILES poset.cc poset.h)
+add_library(test poset.cc poset.h)

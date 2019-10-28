@@ -2,22 +2,19 @@
 #include<unordered_set>
 #include<unordered_map>
 
+namespace jnp1 {
 /**
  * Tworzy nowy poset i zwraca jego identyfikator.
  * @return
  */
-unsigned long poset_new(void);
-
-
+    unsigned long poset_new(void);
 
 /**
  * Jeżeli istnieje poset o identyfikatorze id, usuwa go, a w przeciwnym
  * przypadku nic nie robi.
  * @param id
  */
-void poset_delete(unsigned long id);
-
-
+    void poset_delete(unsigned long id);
 
 /**
  * Jeżeli istnieje poset o identyfikatorze id, to wynikiem jest liczba jego
@@ -25,9 +22,7 @@ void poset_delete(unsigned long id);
  * @param id
  * @return
  */
-size_t poset_size(unsigned long id);
-
-
+    size_t poset_size(unsigned long id);
 
 /**
  * Jeżeli istnieje poset o identyfikatorze id i element value nie należy do
@@ -38,9 +33,7 @@ size_t poset_size(unsigned long id);
  * @param value
  * @return
  */
-bool poset_insert(unsigned long id, char const *value);
-
-
+    bool poset_insert(unsigned long id, char const *value);
 
 /**
  * Jeżeli istnieje poset o identyfikatorze id i element value należy do tego
@@ -51,9 +44,7 @@ bool poset_insert(unsigned long id, char const *value);
  * @param value
  * @return
  */
-bool poset_remove(unsigned long id, char const *value);
-
-
+    bool poset_remove(unsigned long id, char const *value);
 
 /**
  * Jeżeli istnieje poset o identyfikatorze id oraz elementy value1 i value2
@@ -66,9 +57,7 @@ bool poset_remove(unsigned long id, char const *value);
  * @param value2
  * @return
  */
-bool poset_add(unsigned long id, char const *value1, char const *value2);
-
-
+    bool poset_add(unsigned long id, char const *value1, char const *value2);
 
 /**
  * Jeżeli istnieje poset o identyfikatorze id, elementy value1 i value2
@@ -82,9 +71,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2);
  * @param value2
  * @return
  */
-bool poset_del(unsigned long id, char const *value1, char const *value2);
-
-
+    bool poset_del(unsigned long id, char const *value1, char const *value2);
 
 /**
  * Jeżeli istnieje poset o identyfikatorze id, elementy value1 i value2
@@ -95,12 +82,12 @@ bool poset_del(unsigned long id, char const *value1, char const *value2);
  * @param value2
  * @return
  */
-bool poset_test(unsigned long id, char const *value1, char const *value2);
-
+    bool poset_test(unsigned long id, char const *value1, char const *value2);
 
 /**
  * Jeżeli istnieje poset o identyfikatorze id, usuwa wszystkie jego elementy
  * oraz relacje między nimi, a w przeciwnym przypadku nic nie robi.
  * @param id
  */
-void poset_clear(unsigned long id);
+    void poset_clear(unsigned long id);
+}

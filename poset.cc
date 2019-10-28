@@ -2,7 +2,7 @@
 
 namespace jnpzad2{
   using Key = uint64_t;
-  using Elem = std :: unordered_map<Key , std :: unordered_set<Key>>;
+  using Elem = std :: unordered_map<Key , std :: unordered_map<Key, std :: bool>>;
   using ElemMap = std :: unordered_map<Key, Elem>;
   using NameMap = std :: unordered_map<std :: string, Key>;
   using Poset = std :: tuple<ElemMap, NameMap, unsigned int>;
@@ -37,6 +37,7 @@ void addElem(Poset& poset, std :: string& name){
     poset.second[key] = ; //empty set
 }
 
+
 unsigned long poset_new(void) {
     //Could add protection for all long IDs being taken, by iterating once through long and then throwing exception
     while (posets.count(++posetCounter));
@@ -48,7 +49,10 @@ void poset_delete(unsigned long id) {
 }
 
 size_t poset_size(unsigned long id) {
-  //TODO
+  auto answ1 = posets.find(id);
+  if(answ1 == posets.end()) return 0;
+  auto answ2 = get<0>(answ1);
+  return (size_t) answ2.size();
 }
 
 bool poset_insert(unsigned long id, char const *value) {
@@ -78,6 +82,7 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
 
 bool poset_test(unsigned long id, char const *value1, char const *value2) {
   //TODO
+
 }
 
 void poset_clear(unsigned long id) {

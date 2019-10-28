@@ -77,7 +77,6 @@ bool poset_remove(unsigned long id, char const *value) {
 }
 
 bool poset_add(unsigned long id, char const *value1, char const *value2) {
-  //TODO
   //value1 < value2
   std :: string name1 (value1);
   std :: string name2 (value2);
@@ -161,7 +160,7 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
   if(answ4 == elem1.second.first.end() && answ5 == elem2.second.first.end())
     return false;
 
-  if(answ4 == elem1.second.first.end()) {//nie jest elem1 > elem2
+  if(answ4 == elem1.second.first.end()) {//nie jest elem1 > elem2 ==> elem1 < elem2
     elem1.second.second.erase(key2);
     elem2.second.first.erase(key1);
 
@@ -172,7 +171,7 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
       }
     }
   }
-  else {
+  else { //jest elem1 > elem2
     elem2.second.second.erase(key1);
     elem1.second.first.erase(key2);
 
@@ -183,13 +182,31 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
       }
     }
   }
-
-
+  return true;
 }
 
 bool poset_test(unsigned long id, char const *value1, char const *value2) {
-  //TODO
+  //czy value1 < value2
+  std :: string name1 (value1);
+  std :: string name2 (value2);
 
+  auto answ1 = posets.find(id);
+  if(answ1 == posets.end()) return false;
+  auto& ElemMap = get<0>(answ1->second);
+  auto& NameMap = get<1>(answ1->second);
+
+  auto answ2 = NameMap.find(name1);
+  if(answ2 == NameMap.end()) return false;
+  Key key1 = answ2->second;
+
+  auto answ3 = NameMap.find(name2);
+  if(answ3 == NameMap.end()) return false;
+  Key key2 = answ3->second;
+
+  auto& elem2 = ElemMap[key2];
+  auto answ5 = elem2.second.first.find(key1);
+  if(answ5 != elem2.second.first.end()) return true;
+  else return false;
 }
 
 void poset_clear(unsigned long id) {

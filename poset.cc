@@ -2,7 +2,6 @@
 
 namespace jnpzad2{
   using Key = uint64_t;
-  //czy element znaleziony w mapie jest większy od posiadacza mapa
   using Smaller = set<Key>;
   using Bigger = set<Key>;
   using Elem = std :: unordered_map<Key , std :: pair<Smaller, Bigger>>;
@@ -39,6 +38,8 @@ void addElem(Poset& poset, std :: string& name){
     poset.first[name] = key;
     poset.second[key] = ; //empty set
 }
+
+int posetTest()
 
 
 unsigned long poset_new(void) {
@@ -93,6 +94,14 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
   auto answ3 = NameMap.find(name2);
   if(answ3 == NameMap.end()) return false;
   Key key2 = answ3->second;
+
+  auto elem1 = ElemMap[key1];
+  auto answ4 = elem1.second.first.find(key2);
+  if(answ4 != elem1.second.first.end()) return false;
+
+  auto elem2 = ElemMap[key2];
+  auto answ5 = elem2.second.first.find(key2);
+  if(answ5 != elem2.second.first.end()) return false; 
 
 
 

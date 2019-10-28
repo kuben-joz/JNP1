@@ -112,7 +112,6 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
     }
   }
 
-
   //iterate over set of smaller than elem1
   //adding all bigger than elem2 as bigger
 
@@ -156,13 +155,34 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
   //wśród większych od elem1
   auto& elem1 = ElemMap[key1];
   auto answ4 = elem1.second.first.find(key2);
-  if(answ4 != elem1.second.first.end()) return false;
 
   auto& elem2 = ElemMap[key2];
   auto answ5 = elem2.second.first.find(key1);
-  if(answ4 == elem1.second.first.end() || answ5 == elem2.second.first.end())
+  if(answ4 == elem1.second.first.end() && answ5 == elem2.second.first.end())
     return false;
 
+  if(answ4 == elem1.second.first.end()) {//nie jest elem1 > elem2
+    elem1.second.second.erase(key2);
+    elem2.second.first.erase(key1);
+
+    for(const auto& lowerElemKey: elem1.second.first){
+      for(const auto& upperElemKey: elem2.second.second){
+        ElemMap[lowerElemKey]->second.second.erase(upperElemKey);
+        ElemMap[upperElemKey]->second.first.erase(lowerElemKey);
+      }
+    }
+  }
+  else {
+    elem2.second.second.erase(key1);
+    elem1.second.first.erase(key2);
+
+    for(const auto& lowerElemKey: elem2.second.first){
+      for(const auto& upperElemKey: elem1.second.second){
+        ElemMap[lowerElemKey]->second.second.erase(upperElemKey);
+        ElemMap[upperElemKey]->second.first.erase(lowerElemKey);
+      }
+    }
+  }
 
 
 }

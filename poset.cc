@@ -103,6 +103,16 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
   auto answ5 = elem2.second.first.find(key1);
   if(answ5 != elem2.second.first.end()) return false;
 
+  //check if adding an edge would result in a loop
+  for(const auto& lowerElemKey: elem1.second.first){
+    for(const auto& upperElemKey: elem2.second.second){
+      if(ElemMap[lowerElemKey]->second.first.find(upperElemKey)!=
+         ElemMap[lowerElemKey]->second.first.end())
+         return false;
+    }
+  }
+
+
   //iterate over set of smaller than elem1
   //adding all bigger than elem2 as bigger
 
@@ -130,6 +140,29 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
   if(answ1 == posets.end()) return false;
   auto& ElemMap = get<0>(answ1->second);
   auto& NameMap = get<1>(answ1->second);
+
+  auto answ2 = NameMap.find(name1);
+  if(answ2 == NameMap.end()) return false;
+  Key key1 = answ2->second;
+
+  auto answ3 = NameMap.find(name2);
+  if(answ3 == NameMap.end()) return false;
+  Key key2 = answ3->second;
+
+  //jeżeli ~(a < b) ~(b < a)
+  //czyli jeżeli w mniejszych od a nie znajdzie się b
+  //oraz w mniejszych od b nie znajdzie się a
+
+  //wśród większych od elem1
+  auto& elem1 = ElemMap[key1];
+  auto answ4 = elem1.second.first.find(key2);
+  if(answ4 != elem1.second.first.end()) return false;
+
+  auto& elem2 = ElemMap[key2];
+  auto answ5 = elem2.second.first.find(key1);
+  if(answ4 == elem1.second.first.end() || answ5 == elem2.second.first.end())
+    return false;
+
 
 
 }

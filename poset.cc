@@ -78,9 +78,22 @@ bool poset_remove(unsigned long id, char const *value) {
 bool poset_add(unsigned long id, char const *value1, char const *value2) {
   //TODO
   //value1 < value2
+  std :: string name1 (value1);
+  std :: string name2 (value2);
+
   auto answ1 = posets.find(id);
-  if(answ1 == posets.end()) return 0;
-  auto answ2 = get<0>(answ1);
+  if(answ1 == posets.end()) return false;
+  auto& ElemMap = get<0>(answ1->second);
+  auto& NameMap = get<1>(answ1->second);
+
+  auto answ2 = NameMap.find(name1);
+  if(answ2 == NameMap.end()) return false;
+  Key key1 = answ2->second;
+
+  auto answ3 = NameMap.find(name2);
+  if(answ3 == NameMap.end()) return false;
+  Key key2 = answ3->second;
+
 
 
 }

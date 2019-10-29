@@ -39,9 +39,6 @@ void addElem(Poset& poset, std :: string& name){
     poset.second[key] = ; //empty set
 }
 
-int posetTest()
-
-
 unsigned long poset_new(void) {
     //Could add protection for all long IDs being taken, by iterating once through long and then throwing exception
     while (posets.count(++posetCounter));
@@ -130,6 +127,24 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
   return true;
 }
 
+
+bool isDetachable(auto& elem1, auto& elem2, Key key1, Key key2){
+  //only call for elem1 < elem2
+  //a < b
+  //w większych od każdego większego od a nie ma b
+  //w mniejszych od każdego mniejszego od b nie ma a
+  for(const auto& bigr1: elem1.second.second) {
+    if(bigr1.second.second.find(key2) != bigr1.second.second.end())
+      return false;
+  }
+
+  for(const auto& smalr2: elem2.second.first){
+    if(smalr2.second.first.find(key1) != smalr2.second.first.end())
+      return false;
+  }
+  return true;
+}
+
 bool poset_del(unsigned long id, char const *value1, char const *value2) {
   std :: string name1 (value1);
   std :: string name2 (value2);
@@ -148,8 +163,7 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
   Key key2 = answ3->second;
 
   //jeżeli ~(a < b) ~(b < a)
-  //czyli jeżeli w mniejszych od a nie znajdzie się b
-  //oraz w mniejszych od b nie znajdzie się a
+
 
   //wśród większych od elem1
   auto& elem1 = ElemMap[key1];
@@ -160,7 +174,16 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
   if(answ4 == elem1.second.first.end() && answ5 == elem2.second.first.end())
     return false;
 
-  if(answ4 == elem1.second.first.end()) {//nie jest elem1 > elem2 ==> elem1 < elem2
+  //czyli jeżeli w mniejszych od a nie znajdzie się b
+  //oraz w mniejszych od b nie znajdzie się a
+
+
+
+
+  if(answ4 == elem1.second.first.end()) {//nie jest elem1 > elem2 => elem1 < elem2
+    if(!isDetachable(elem1, elem2, key1, key2))
+      return false;
+
     elem1.second.second.erase(key2);
     elem2.second.first.erase(key1);
 
@@ -172,6 +195,9 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
     }
   }
   else { //jest elem1 > elem2
+    if(!isDetachable(elem2, elem1, key2, key1))
+      return false;
+
     elem2.second.second.erase(key1);
     elem1.second.first.erase(key2);
 

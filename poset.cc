@@ -34,9 +34,11 @@ Key hashString(const Poset& poset, const std :: string& name){
 }
 
 void addElem(Poset& poset, std :: string& name){
+    Elem newElem;
     Key key = hashString(poset, name);
-    poset.first[name] = key;
-    poset.second[key] = make_pair(); //empty set
+    get<0>(poset)[name] = key;
+    get<1>(poset)[key]= newElem;
+    get<2>(poset)++;
 }
 
 unsigned long poset_new(void) {

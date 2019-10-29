@@ -151,19 +151,22 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
 }
 
 
-bool isDetachable(Elem &elem1, Elem &elem2, Key key1, Key key2){
+bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2){
   //only call for elem1 < elem2
   //a < b
   //w większych od każdego większego od a nie ma b
   //w mniejszych od każdego mniejszego od b nie ma a
 
   //trzeba dodać elemMap ...
-  for(const auto& bigr1: elem1.second) {
-    if(bigr1.second.find(key2) != bigr1.second.end())
+  for(const auto& kbigr1: elem1.second) {
+    auto& bigr1 = elemMap[kbigr1];
+    if(bigr1.second.find(key2) !=
+       bigr1.second.end())
       return false;
   }
 
-  for(const auto& smalr2: elem2.first){
+  for(const auto& ksmalr2: elem2.first){
+    auto& smalr2 = elemMap[ksmalr2];
     if(smalr2.first.find(key1) != smalr2.first.end())
       return false;
   }
@@ -177,25 +180,25 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
 
   auto answ1 = posets.find(id);
   if(answ1 == posets.end()) return false;
-  auto& ElemMap = answ1->second.first;
-  auto& NameMap = answ1->second.second;
+  auto& elemMap = answ1->second.first;
+  auto& nameMap = answ1->second.second;
 
-  auto answ2 = NameMap.find(name1);
-  if(answ2 == NameMap.end()) return false;
+  auto answ2 = nameMap.find(name1);
+  if(answ2 == nameMap.end()) return false;
   Key key1 = answ2->second;
 
-  auto answ3 = NameMap.find(name2);
-  if(answ3 == NameMap.end()) return false;
+  auto answ3 = nameMap.find(name2);
+  if(answ3 == nameMap.end()) return false;
   Key key2 = answ3->second;
 
   //jeżeli ~(a < b) ~(b < a)
 
 
   //wśród większych od elem1
-  auto& elem1 = ElemMap[key1];
+  auto& elem1 = elemMap[key1];
   auto answ4 = elem1.first.find(key2);
 
-  auto& elem2 = ElemMap[key2];
+  auto& elem2 = elemMap[key2];
   auto answ5 = elem2.first.find(key1);
   if(answ4 == elem1.first.end() && answ5 == elem2.first.end())
     return false;
@@ -205,7 +208,7 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
 
 
   if(answ4 == elem1.first.end()) {//nie jest elem1 > elem2 => elem1 < elem2
-    if(!isDetachable(elem1, elem2, key1, key2))
+    if(!isDetachable(elemMap, elem1, elem2, key1, key2))
       return false;
 
     elem1.second.erase(key2);
@@ -213,13 +216,13 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
 
     for(const auto& lowerElemKey: elem1.first){
       for(const auto& upperElemKey: elem2.second){
-        ElemMap[lowerElemKey]->second.erase(upperElemKey);
-        ElemMap[upperElemKey]->first.erase(lowerElemKey);
+        elemMap[lowerElemKey].second.erase(upperElemKey);
+        elemMap[upperElemKey].first.erase(lowerElemKey);
       }
     }
   }
   else { //jest elem1 > elem2
-    if(!isDetachable(elem2, elem1, key2, key1))
+    if(!isDetachable(elemMap, elem2, elem1, key2, key1))
       return false;
 
     elem2.second.erase(key1);
@@ -227,8 +230,8 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
 
     for(const auto& lowerElemKey: elem2.first){
       for(const auto& upperElemKey: elem1.second){
-        ElemMap[lowerElemKey]->second.erase(upperElemKey);
-        ElemMap[upperElemKey]->first.erase(lowerElemKey);
+        elemMap[lowerElemKey].second.erase(upperElemKey);
+        elemMap[upperElemKey].first.erase(lowerElemKey);
       }
     }
   }

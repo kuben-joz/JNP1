@@ -2,8 +2,8 @@
 
 namespace jnpzad2{
   using Key = uint64_t;
-  using Smaller = set<Key>;
-  using Bigger = set<Key>;
+  using Smaller = std :: unordered_set<Key>;
+  using Bigger = std :: unordered_set<Key>;
   using Elem = std :: unordered_map<Key , std :: pair<Smaller, Bigger>>;
   using ElemMap = std :: unordered_map<Key, Elem>;
   using NameMap = std :: unordered_map<std :: string, Key>;
@@ -36,7 +36,7 @@ Key hashString(const Poset& poset, const std :: string& name){
 void addElem(Poset& poset, std :: string& name){
     Key key = hashString(poset, name);
     poset.first[name] = key;
-    poset.second[key] = ; //empty set
+    poset.second[key] = make_pair(); //empty set
 }
 
 unsigned long poset_new(void) {
@@ -47,6 +47,7 @@ unsigned long poset_new(void) {
 }
 void poset_delete(unsigned long id) {
   //TODO
+  return true;
 }
 
 size_t poset_size(unsigned long id) {
@@ -71,6 +72,7 @@ bool poset_insert(unsigned long id, char const *value) {
 
 bool poset_remove(unsigned long id, char const *value) {
   //TODO
+  return true;
 }
 
 bool poset_add(unsigned long id, char const *value1, char const *value2) {

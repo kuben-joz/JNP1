@@ -1,6 +1,7 @@
 #include "poset.h"
 #include <set>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace jnpzad2{
   using Key = uint64_t;
@@ -93,34 +94,35 @@ bool poset_insert(unsigned long id, char const *value) {
 }
 
 bool poset_remove(const unsigned long id, char const *value) {
-    const std ::unordered_map<PosetContainerIndexType, PosetBody&> :: iterator posetsIt = posets.find(id);
+    std ::unordered_map<PosetContainerIndexType, Poset&> :: const_iterator posetsIt = posets.find(id);
     if(posetsIt == posets.end()) {
       return false;
     }
-    const NameMap :: iterator nameMapIt = (*posetsIt).second.second.find(value);
-    if(nameMapIt == (*posetsIt).second.second.end()) {
+    PosetBody& currentPosetBody = (*posetsIt).second.first;
+    NameMap :: const_iterator nameMapIt = currentPosetBody.second.find(value);
+    if(nameMapIt == currentPosetBody.second.end()) {
         return false;
     }
-    Key keyToRemove = (*nameMapIt).second;
-    ElemMap :: iterator elemMapIt = (*posetsIt).second.first.find(keyToRemove);
+    const Key keyToRemove = (*nameMapIt).second;
+    ElemMap :: const_iterator elemMapIt = currentPosetBody.first.find(keyToRemove);
     Elem relations = (*elemMapIt).second;
 
-    Smaller :: iterator smallerIt = relations.first.begin();
+    Smaller :: const_iterator smallerIt = relations.first.begin();
     while(smallerIt != relations.first.end()) {
         Key tempKey = *smallerIt++;
-        Elem tempElem = (*(*posetsIt).second.first.find(tempKey)).second;
+        Elem& tempElem = (*currentPosetBody.first.find(tempKey)).second;
         tempElem.second.erase(keyToRemove);
     }
 
-    Bigger :: iterator biggerIt = relations.second.begin();
+    Bigger :: const_iterator biggerIt = relations.second.begin();
     while(biggerIt != relations.second.end()) {
         Key tempKey = *biggerIt++;
-        Elem tempElem = (*(*posetsIt).second.first.find(tempKey)).second;
+        Elem tempElem = (*currentPosetBody.first.find(tempKey)).second;
         tempElem.second.erase(keyToRemove);
     }
 
-    (*posetsIt).second.first.erase(keyToRemove);
-    (*posetsIt).second.second.erase(value);
+    currentPosetBody.first.erase(keyToRemove);
+    currentPosetBody.second.erase(value);
 
     return true;
 }
@@ -143,8 +145,8 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
 
   auto answ1 = posets.find(id);
   if(answ1 == posets.end()) return false;
-  auto& elemMap = answ1->second.first; //dlaczego &
-  auto& nameMap = answ1->second.second; //dlaczego &
+  auto& elemMap = answ1->second.first.first; //dlaczego &
+  auto& nameMap = answ1->second.first.second; //dlaczego &
 
   auto answ2 = nameMap.find(name1);
   if(answ2 == nameMap.end()) return false;
@@ -224,8 +226,8 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
 
   auto answ1 = posets.find(id);
   if(answ1 == posets.end()) return false;
-  auto& elemMap = answ1->second.first;
-  auto& nameMap = answ1->second.second;
+  auto& elemMap = (*answ1).second.first.first;
+  auto& nameMap = (*answ1).second.first.second;
 
   auto answ2 = nameMap.find(name1);
   if(answ2 == nameMap.end()) return false;
@@ -281,8 +283,8 @@ bool poset_test(unsigned long id, char const *value1, char const *value2) {
 
   auto answ1 = posets.find(id);
   if(answ1 == posets.end()) return false;
-  auto& elemMap = answ1->second.first;
-  auto& nameMap = answ1->second.second;
+  auto& elemMap = (*answ1).second.first.first;
+  auto& nameMap = (*answ1).second.first.second;
 
   auto answ2 = nameMap.find(name1);
   if(answ2 == nameMap.end()) return false;

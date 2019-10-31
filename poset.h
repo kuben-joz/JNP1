@@ -3,9 +3,10 @@
 
 //dont need to do this but maybe better we do
 #ifndef _cplusplus
-    #include "stddef.h"
-    #include "stdbool.h"
+#include "stdbool.h"
 #endif
+
+#include "stddef.h"
 
 #ifdef _cplusplus
 namespace jnp1 {
@@ -110,4 +111,5 @@ void poset_clear(unsigned long id);
 #ifdef _cplusplus
 }
 #endif
+
 #endif

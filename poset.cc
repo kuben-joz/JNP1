@@ -1,5 +1,4 @@
 #include "poset.h"
-#include <set>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -27,11 +26,11 @@ static PosetContainerIndexType posetCounter = 0;
 //może trzymać referencje do posetów &poset
 //to zapasowy pomysł jeżeli kompilator będzie miał problem
 
-static std ::unordered_map<PosetContainerIndexType, Poset&> posets;
+static std ::unordered_map<PosetContainerIndexType, Poset> posets;
 
-
+/*
 Key hashString(const PosetBody& poset, const std :: string& name){
-    /*ElemMap tempElems = std :: get<0>(poset);
+    ElemMap tempElems = std :: get<0>(poset);
     NameMap tempNames = std :: get<1>(poset);
     auto tempNameIter = tempNames.find(name);
     if(tempNameIter == tempNames.end()) {
@@ -41,9 +40,10 @@ Key hashString(const PosetBody& poset, const std :: string& name){
         //add to ElemMap and NameMap here isntead of after exit
     }
     else return (*tempNameIter).second;
-    */
+
     return 0;
 }
+*/
 
 void addElem(Poset& poset, std :: string& name){
     ElemMap tempElems = poset.first.first;
@@ -61,7 +61,10 @@ void addElem(Poset& poset, std :: string& name){
 
 unsigned long poset_new(void) {
     while (posets.count(++posetCounter));
-    posets.emplace(std :: make_pair(posetCounter, Poset{}));
+    //posets.emplace(std :: make_pair(posetCounter, Poset{}));
+    //Poset newP = Poset{};
+    posets.emplace(posetCounter, Poset{});
+    //posets.insert(std :: make_pair(posetCounter, Poset{}));
     return posetCounter;
 }
 
@@ -94,11 +97,11 @@ bool poset_insert(unsigned long id, char const *value) {
 }
 
 bool poset_remove(const unsigned long id, char const *value) {
-    std ::unordered_map<PosetContainerIndexType, Poset&> :: const_iterator posetsIt = posets.find(id);
+    std ::unordered_map<PosetContainerIndexType, Poset> :: const_iterator posetsIt = posets.find(id);
     if(posetsIt == posets.end()) {
       return false;
     }
-    PosetBody& currentPosetBody = (*posetsIt).second.first;
+    PosetBody currentPosetBody = (*posetsIt).second.first;
     NameMap :: const_iterator nameMapIt = currentPosetBody.second.find(value);
     if(nameMapIt == currentPosetBody.second.end()) {
         return false;
@@ -301,5 +304,8 @@ bool poset_test(unsigned long id, char const *value1, char const *value2) {
 }
 
 void poset_clear(unsigned long id) {
-  //TODO
+    auto posetsIt = posets.find(id);
+    if(posetsIt == posets.end()) return;
+
+
 }

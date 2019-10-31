@@ -10,9 +10,6 @@
 
 #ifdef __cplusplus
 namespace jnp1 {
-#endif
-
-#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -108,9 +105,6 @@ void poset_clear(unsigned long id);
 
 #ifdef __cplusplus
 } // extern "C"
-#endif
-
-#ifdef __cplusplus
 } // namespace jnp1
 #endif
 

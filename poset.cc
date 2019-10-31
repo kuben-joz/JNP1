@@ -1,9 +1,10 @@
 #include "poset.h"
 #include <unordered_map>
 #include <unordered_set>
+#include <cassert>
 
 
-  using Key = uint64_t;
+using Key = uint64_t;
   using Smaller = std :: unordered_set<Key>;
   using Bigger = std :: unordered_set<Key>;
   using Elem = std :: pair<Smaller, Bigger>;
@@ -28,25 +29,6 @@ static PosetContainerIndexType posetCounter = 0;
 
 static std ::unordered_map<PosetContainerIndexType, Poset> posets;
 
-
-
-/*
-Key hashString(const PosetBody& poset, const std :: string& name){
-    ElemMap tempElems = std :: get<0>(poset);
-    NameMap tempNames = std :: get<1>(poset);
-    auto tempNameIter = tempNames.find(name);
-    if(tempNameIter == tempNames.end()) {
-        unsigned int counter = std :: get<2>(poset);
-        while((std :: get()<0>(tempElems).count(++counter)));
-
-        //add to ElemMap and NameMap here isntead of after exit
-    }
-    else return (*tempNameIter).second;
-
-    return 0;
-}
-*/
-
 void addElem(Poset &poset, std::string &name) {
     ElemMap &tempElems = poset.first.first;
     NameMap &tempNames = poset.first.second;
@@ -66,25 +48,26 @@ void addElem(Poset &poset, std::string &name) {
 unsigned long jnp1::poset_new(void) {
     while (posets.count(++posetCounter));
     posets.emplace(posetCounter, Poset{});
+    assert(posets.count(posetCounter));
     return posetCounter;
 }
 
 //unsigned long here makes the thing unsightly
-void jnp1::poset_delete(const unsigned long id) {
+void jnp1::poset_delete(const PosetContainerIndexType id) {
     auto toDelete = posets.find(id);
     if (toDelete != posets.end()) {
         posets.erase(toDelete);
     }
 }
 
-size_t jnp1::poset_size(unsigned long id) {
+size_t jnp1::poset_size(const PosetContainerIndexType id) {
     auto answ1 = posets.find(id);
     if (answ1 == posets.end()) return 0;
     return (*answ1).second.first.second.size(); //I dont think we have to cast
     //return (size_t) poset.first.size();
 }
 
-bool jnp1::poset_insert(unsigned long id, char const *value) {
+bool jnp1::poset_insert(const PosetContainerIndexType id, char const *value) {
     std::string name(value);
     auto answ1 = posets.find(id);
     if (answ1 == posets.end()) return false;
@@ -107,14 +90,20 @@ bool jnp1::poset_remove(const unsigned long id, char const *value) {
     if (nameMapIt == currentPosetBody.second.end()) {
         return false;
     }
+
     const Key keyToRemove = (*nameMapIt).second;
     ElemMap::iterator elemMapIt = currentPosetBody.first.find(keyToRemove);
+    // Asserts iff an element that was in NameMap is also present in ElemMap,
+    // an invariant of PosetBody
+    assert(elemMapIt != currentPosetBody.first.end());
     Elem &relations = (*elemMapIt).second;
 
     Smaller::const_iterator smallerIt = relations.first.begin();
     while (smallerIt != relations.first.end()) {
         Key tempKey = *smallerIt++;
         Elem &tempElem = (*currentPosetBody.first.find(tempKey)).second;
+        // Asserts that a < b -> b > a
+        assert(tempElem.second.count(tempKey));
         tempElem.second.erase(keyToRemove);
     }
 
@@ -122,7 +111,9 @@ bool jnp1::poset_remove(const unsigned long id, char const *value) {
     while (biggerIt != relations.second.end()) {
         Key tempKey = *biggerIt++;
         Elem &tempElem = (*currentPosetBody.first.find(tempKey)).second;
-        tempElem.second.erase(keyToRemove);
+        // Asserts that b > a -> a < b
+        assert(tempElem.second.count(tempKey));
+        tempElem.first.erase(keyToRemove);
     }
 
     currentPosetBody.first.erase(keyToRemove);
@@ -131,6 +122,7 @@ bool jnp1::poset_remove(const unsigned long id, char const *value) {
     return true;
 }
 
+//// assertions finished here
 bool loopCheck(ElemMap &elemMap, Elem &elem1, Elem &elem2) {
     for (const auto &lowerElemKey: elem1.first) {
         for (const auto &upperElemKey: elem2.second) {
@@ -208,14 +200,14 @@ bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2
     //w mniejszych od każdego mniejszego od b nie ma a
 
     //trzeba dodać elemMap ...
-    for (const auto &kbigr1: elem1.second) {
+    for (const auto &kbigr1 : elem1.second) {
         auto &bigr1 = elemMap[kbigr1];
         if (bigr1.second.find(key2) !=
             bigr1.second.end())
             return false;
     }
 
-    for (const auto &ksmalr2: elem2.first) {
+    for (const auto &ksmalr2 : elem2.first) {
         auto &smalr2 = elemMap[ksmalr2];
         if (smalr2.first.find(key1) != smalr2.first.end())
             return false;
@@ -280,7 +272,7 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
 }
 
 bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) {
-    //czy value1 < value2
+    //czy value1 < value2Successful compilation and linking
     std::string name1(value1);
     std::string name2(value2);
 
@@ -303,7 +295,7 @@ bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) 
     else return false;
 }
 
-//test for leaks
+
 void jnp1::poset_clear(unsigned long id) {
     auto posetsIt = posets.find(id);
     if (posetsIt == posets.end()) return;

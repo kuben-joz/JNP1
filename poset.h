@@ -2,19 +2,21 @@
 #define POSET_H
 
 //dont need to do this but maybe better we do
-#ifndef _cplusplus
+#ifndef __cplusplus
 #include "stdbool.h"
 #endif
 
 #include "stddef.h"
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 namespace jnp1 {
 #endif
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
+
+
 
 /**
  * Tworzy nowy poset i zwraca jego identyfikator.
@@ -104,12 +106,12 @@ bool poset_test(unsigned long id, char const *value1, char const *value2);
  */
 void poset_clear(unsigned long id);
 
-#ifdef _cplusplus
-}
+#ifdef __cplusplus
+} // extern "C"
 #endif
 
-#ifdef _cplusplus
-}
+#ifdef __cplusplus
+} // namespace jnp1
 #endif
 
-#endif
+#endif //POSET_H

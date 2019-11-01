@@ -51,6 +51,7 @@ void addElem(Poset &poset, std::string &name) {
 
 
 unsigned long jnp1::poset_new(void) {
+    if(debug) std :: ios_base :: Init();
     if(debug) {
         std::cerr << "poset_new()\n";
     }
@@ -64,6 +65,7 @@ unsigned long jnp1::poset_new(void) {
 }
 
 void jnp1::poset_delete(const PosetContainerIndexType id) {
+    if(debug) std :: ios_base :: Init();
     if(debug) {
         std::cerr << "poset_delete(" << id << ")\n";
     }
@@ -80,6 +82,7 @@ void jnp1::poset_delete(const PosetContainerIndexType id) {
 }
 
 size_t jnp1::poset_size(const PosetContainerIndexType id) {
+    if(debug) std :: ios_base :: Init();
     if(debug) {
         std::cerr << "poset_size(" << id << ")\n";
     }
@@ -97,6 +100,7 @@ size_t jnp1::poset_size(const PosetContainerIndexType id) {
 }
 
 bool jnp1::poset_insert(const PosetContainerIndexType id, char const *value) {
+    if(debug) std :: ios_base :: Init();
     if(value == NULL) {
         if(debug) {
             std::cerr << "poset_insert(" << id << ", NULL)\n";
@@ -132,6 +136,7 @@ bool jnp1::poset_insert(const PosetContainerIndexType id, char const *value) {
 }
 
 bool jnp1::poset_remove(const unsigned long id, char const *value) {
+    if(debug) std :: ios_base :: Init();
     if(value == NULL) {
         if (debug) {
             std::cerr << "poset_remove(" << id << ", " << "NULL)\n";
@@ -214,6 +219,7 @@ bool loopCheck(ElemMap &elemMap, Elem &elem1, Elem &elem2) {
 }
 
 bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
+    if(debug) std :: ios_base :: Init();
     if(value1 == NULL && value2 == NULL){
       if(debug) std :: cerr << "poset_add(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<"NULL" <<")\n";
       if(debug) std :: cerr << "poset_add: invalid value1 (NULL)\n";
@@ -325,6 +331,7 @@ bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2
 }
 
 bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
+    if(debug) std :: ios_base :: Init();
     if(value1 == NULL && value2 == NULL){
       if(debug) std :: cerr << "poset_del(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<"NULL" <<")\n";
       if(debug) std :: cerr << "poset_del: invalid value1 (NULL)\n";
@@ -411,6 +418,7 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
 }
 
 bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) {
+    if(debug) std :: ios_base :: Init();
     if(value1 == NULL && value2 == NULL){
         if(debug) std :: cerr << "poset_test(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<"NULL" <<")\n";
         if(debug) std :: cerr << "poset_test: invalid value1 (NULL)\n";
@@ -464,6 +472,7 @@ bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) 
 
 
 void jnp1::poset_clear(unsigned long id) {
+    if(debug) std :: ios_base :: Init();
     if(debug) {
         std::cerr << "poset_clear(" << id << ")\n";
     }

@@ -11,15 +11,15 @@ const bool debug = false;
 #endif
 
 using Key = uint64_t;
-  using Smaller = std :: unordered_set<Key>;
-  using Bigger = std :: unordered_set<Key>;
-  using Elem = std :: pair<Smaller, Bigger>;
-  using ElemMap = std :: unordered_map<Key, Elem>;
-  using NameMap = std :: unordered_map<std :: string, Key>;
-  using PosetBody = std :: pair <ElemMap, NameMap>;
-  using PosetInternalCounter = Key;
-  using Poset = std :: pair <PosetBody, PosetInternalCounter>;
-  using PosetContainerIndexType = unsigned long;
+using Smaller = std :: unordered_set<Key>;
+using Bigger = std :: unordered_set<Key>;
+using Elem = std :: pair<Smaller, Bigger>;
+using ElemMap = std :: unordered_map<Key, Elem>;
+using NameMap = std :: unordered_map<std :: string, Key>;
+using PosetBody = std :: pair <ElemMap, NameMap>;
+using PosetInternalCounter = Key;
+using Poset = std :: pair <PosetBody, PosetInternalCounter>;
+using PosetContainerIndexType = unsigned long;
 
 /**
  * TODO
@@ -30,8 +30,6 @@ using Key = uint64_t;
 
 ////Could consider anonymous workspace instead
 static PosetContainerIndexType posetCounter = 0;
-//może trzymać referencje do posetów &poset
-//to zapasowy pomysł jeżeli kompilator będzie miał problem
 
 static std ::unordered_map<PosetContainerIndexType, Poset> posets;
 
@@ -46,8 +44,6 @@ void addElem(Poset &poset, std::string &name) {
         PosetInternalCounter &counter = poset.second;
         while (tempElems.count(++counter));
         tempElems.emplace(counter, Elem{});
-        //tempElems[counter].first.emplace(counter);
-        //tempElems[counter].second.emplace(counter);
         tempNames.emplace(name, counter);
     }
 }
@@ -227,7 +223,7 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
       return false;
     }
     if(debug) std :: cerr << "poset_add(\"" << id <<"\", \"" << value1 <<"\", \"" <<value2 <<")\n";
-    //value1 < value2
+
     std::string name1(value1);
     std::string name2(value2);
 
@@ -266,8 +262,8 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
       if(debug) std :: cerr << "poset_add: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be added\n";
       return false;
     }
-    //check if adding an edge would result in a loop
 
+    //check if adding an edge would result in a loop
     if (loopCheck(elemMap, elem1, elem2) == true){
       if(debug) std :: cerr << "poset_add: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be added\n";
       return false;
@@ -299,12 +295,6 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
 
 
 bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2) {
-    //only call for elem1 < elem2
-    //a < b
-    //w większych od każdego większego od a nie ma b
-    //w mniejszych od każdego mniejszego od b nie ma a
-
-    //trzeba dodać elemMap ...
     for (const auto &kbigr1 : elem1.second) {
         auto &bigr1 = elemMap[kbigr1];
         if (bigr1.second.find(key2) !=
@@ -394,11 +384,6 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
     return true;
 }
 
-/*
- * TODO
- * make sure realtions are present, transitivty not working
- */
-
 bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) {
 
     if(value1 == NULL) {
@@ -410,7 +395,7 @@ bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) 
         return false;
     }
     if(debug) std :: cerr << "poset_test(\"" << id <<"\", \"" << value1 <<"\", \"" <<value2 <<")\n";
-    //czy value1 < value2
+
     std::string name1(value1);
     std::string name2(value2);
 

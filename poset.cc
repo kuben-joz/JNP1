@@ -249,6 +249,11 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
     }
     Key key2 = answ3->second;
 
+    if (key1 == key2){
+      if(debug) std :: cerr << "poset_del: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be added\n";
+      return false;
+    }
+
     auto &elem1 = elemMap[key1];
     auto answ4 = elem1.first.find(key2);
     if (answ4 != elem1.first.end()){
@@ -346,6 +351,11 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
       return false;
     }
     Key key2 = answ3->second;
+
+    if (key1 == key2){
+      if(debug) std :: cerr << "poset_del: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be deleted\n";
+      return false;
+    }
 
     auto &elem1 = elemMap[key1];
     auto answ4 = elem1.first.find(key2);

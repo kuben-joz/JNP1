@@ -13,3 +13,6 @@ target_link_libraries(cpptest libposet)
 
 add_executable(ctest ctest.c)
 target_link_libraries(ctest libposet)
+
+add_executable(poset_example1 poset_example1.c)
+target_link_libraries(poset_example1 libposet)

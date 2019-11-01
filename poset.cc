@@ -94,7 +94,7 @@ size_t jnp1::poset_size(const PosetContainerIndexType id) {
         return 0;
     }
     if(debug) {
-        std::cerr << "poset_size: found poset of size " << (*answ1).second.first.second.size() << "\n";
+        std::cerr << "poset_size: found poset " << id << " of size " << (*answ1).second.first.second.size() << "\n";
     }
     return (*answ1).second.first.second.size();
 }
@@ -145,6 +145,10 @@ bool jnp1::poset_remove(const unsigned long id, char const *value) {
     }
 
     std::string valueString(value);
+    if (debug) {
+        std::cerr << "poset_remove(" << id << ", " << valueString <<")\n";
+    }
+
     std::unordered_map<PosetContainerIndexType, Poset>::iterator posetsIt = posets.find(id);
     if (posetsIt == posets.end()) {
         if(debug) {
@@ -210,6 +214,10 @@ bool loopCheck(ElemMap &elemMap, Elem &elem1, Elem &elem2) {
 }
 
 bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
+
+    if(value1 == NULL || value2 == NULL) {
+        return false;
+    }
     //value1 < value2
     std::string name1(value1);
     std::string name2(value2);
@@ -292,6 +300,9 @@ bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2
 }
 
 bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
+    if(value1 == NULL || value2 == NULL) {
+        return false;
+    }
     std::string name1(value1);
     std::string name2(value2);
 
@@ -346,7 +357,17 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
     return true;
 }
 
+/*
+ * TODO
+ * make sure realtions are present, transitivty not working
+ */
+
 bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) {
+
+    if(value1 == NULL || value2 == NULL) {
+        return false;
+    }
+
     //czy value1 < value2Successful compilation and linking
     std::string name1(value1);
     std::string name2(value2);

@@ -2,6 +2,13 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <cassert>
+#include <iostream>
+
+#ifndef NDEBUG
+const bool debug = true;
+#else
+const bool debug = false;
+#endif
 
 
 using Key = uint64_t;
@@ -30,71 +37,135 @@ static PosetContainerIndexType posetCounter = 0;
 static std ::unordered_map<PosetContainerIndexType, Poset> posets;
 
 void addElem(Poset &poset, std::string &name) {
+    assert(!poset.first.second.count(name));
     ElemMap &tempElems = poset.first.first;
     NameMap &tempNames = poset.first.second;
 
     auto tempNameIter = tempNames.find(name);
 
     if (tempNameIter == tempNames.end()) {
-        PosetInternalCounter &counter = poset.second; //Should counter be without &???
+        PosetInternalCounter &counter = poset.second;
         while (tempElems.count(++counter));
-        tempElems.emplace(make_pair(counter, Elem{})); //am I passing counter by reference? if so that pretty bad
-        tempNames.emplace(name, counter); //again is this by value or reference
+        tempElems.emplace(counter, Elem{});
+        tempNames.emplace(name, counter);
     }
 }
 
 
 
 unsigned long jnp1::poset_new(void) {
+    if(debug) {
+        std::cerr << "poset_new()\n";
+    }
     while (posets.count(++posetCounter));
     posets.emplace(posetCounter, Poset{});
     assert(posets.count(posetCounter));
+    if(debug) {
+        std :: cerr << "poset_new: created poset with id " << posetCounter << "\n";
+    }
     return posetCounter;
 }
 
-//unsigned long here makes the thing unsightly
 void jnp1::poset_delete(const PosetContainerIndexType id) {
+    if(debug) {
+        std::cerr << "poset_delete(" << id << ")\n";
+    }
     auto toDelete = posets.find(id);
     if (toDelete != posets.end()) {
         posets.erase(toDelete);
+        if(debug) {
+            std::cerr << "poset_delete: poset " << id << " deleted\n";
+        }
+    }
+    else if(debug){ //toDelete == posets.end()
+        std :: cerr << "poset_delete: poset " << id << " not found\n";
     }
 }
 
 size_t jnp1::poset_size(const PosetContainerIndexType id) {
+    if(debug) {
+        std::cerr << "poset_size(" << id << ")\n";
+    }
     auto answ1 = posets.find(id);
-    if (answ1 == posets.end()) return 0;
-    return (*answ1).second.first.second.size(); //I dont think we have to cast
-    //return (size_t) poset.first.size();
+    if (answ1 == posets.end()) {
+        if(debug) {
+            std::cerr << "poset_size: poset " << id << " not found\n";
+        }
+        return 0;
+    }
+    if(debug) {
+        std::cerr << "poset_size: found poset of size " << (*answ1).second.first.second.size() << "\n";
+    }
+    return (*answ1).second.first.second.size();
 }
 
 bool jnp1::poset_insert(const PosetContainerIndexType id, char const *value) {
+    if(value == NULL) {
+        if(debug) {
+            std::cerr << "poset_insert(" << id << ", NULL)\n";
+            std::cerr << "poset_insert: Illegal value (NULL)\n";
+        }
+        return false;
+    }
     std::string name(value);
+    if(debug) {
+        std::cerr << "poset_insert(" << id << ", " << name << ")\n";
+    }
     auto answ1 = posets.find(id);
-    if (answ1 == posets.end()) return false;
-    auto &poset = answ1->second;
+    if (answ1 == posets.end()) {
+        if(debug) {
+            std::cerr << "poset_insert: poset " << id << " not found\n";
+        }
+        return false;
+    }
+    Poset& poset = answ1->second;
     auto answ2 = poset.first.second.find(name);
     if (answ2 == poset.first.second.end()) {
         addElem(poset, name);
+        if(debug) {
+            std::cerr << "poset_insert: value " << name << " successfully added to poset\n";
+        }
         return true;
+    }
+    if(debug) {
+        std::cerr << "poset_insert: poset " << id <<
+        " already contains value " << name << "\n";
     }
     return false;
 }
 
 bool jnp1::poset_remove(const unsigned long id, char const *value) {
+    if(value == NULL) {
+        if (debug) {
+            std::cerr << "poset_remove(" << id << ", " << "NULL)\n";
+            std::cerr << "poset_remove: invalid value (NULL)\n";
+        }
+        return false;
+
+    }
+
+    std::string valueString(value);
     std::unordered_map<PosetContainerIndexType, Poset>::iterator posetsIt = posets.find(id);
     if (posetsIt == posets.end()) {
+        if(debug) {
+            std::cerr << "poset_remove: poset " << id << " not found\n";
+        }
         return false;
+
     }
     PosetBody &currentPosetBody = (*posetsIt).second.first;
-    NameMap::const_iterator nameMapIt = currentPosetBody.second.find(value);
+    NameMap::const_iterator nameMapIt = currentPosetBody.second.find(valueString);
     if (nameMapIt == currentPosetBody.second.end()) {
+        if(debug) {
+            std::cerr << "poset_remove: poset " << id << " does not contain value " << valueString << "\n";
+        }
         return false;
     }
 
     const Key keyToRemove = (*nameMapIt).second;
     ElemMap::iterator elemMapIt = currentPosetBody.first.find(keyToRemove);
     // Asserts iff an element that was in NameMap is also present in ElemMap,
-    // an invariant of PosetBody
+    // which is an invariant of PosetBody
     assert(elemMapIt != currentPosetBody.first.end());
     Elem &relations = (*elemMapIt).second;
 
@@ -117,7 +188,11 @@ bool jnp1::poset_remove(const unsigned long id, char const *value) {
     }
 
     currentPosetBody.first.erase(keyToRemove);
-    currentPosetBody.second.erase(value);
+    currentPosetBody.second.erase(valueString);
+
+    if(debug) {
+        std::cerr << "poset_remove: value " << valueString << " has been removed from poset " << id << "\n";
+    }
 
     return true;
 }
@@ -297,11 +372,21 @@ bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) 
 
 
 void jnp1::poset_clear(unsigned long id) {
+    if(debug) {
+        std::cerr << "poset_clear(" << id << ")\n";
+    }
     auto posetsIt = posets.find(id);
-    if (posetsIt == posets.end()) return;
+    if (posetsIt == posets.end()) {
+        if(debug) {
+            std::cerr << "poset_clear: poset " << id << " not found\n";
+        }
+    }
     else {
         (*posetsIt).second.first.first.clear();
         (*posetsIt).second.first.second.clear();
+        if(debug) {
+            std::cerr << "poset_clear: poset " << id << " has been cleared\n";
+        }
     }
 
 }

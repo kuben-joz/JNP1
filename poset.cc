@@ -412,9 +412,10 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
 
 bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) {
     if(value1 == NULL && value2 == NULL){
-      if(debug) std :: cerr << "poset_test(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<"NULL" <<")\n";
-      if(debug) std :: cerr << "poset_test: invalid value1 (NULL)\n";
-      if(debug) std :: cerr << "poset_test: invalid value2 (NULL)\n";
+        if(debug) std :: cerr << "poset_test(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<"NULL" <<")\n";
+        if(debug) std :: cerr << "poset_test: invalid value1 (NULL)\n";
+        if(debug) std :: cerr << "poset_test: invalid value2 (NULL)\n";
+        return false;
     }
 
     if(value1 == NULL) {

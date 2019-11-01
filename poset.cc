@@ -214,11 +214,19 @@ bool loopCheck(ElemMap &elemMap, Elem &elem1, Elem &elem2) {
 }
 
 bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
+    if(value1 == NULL && value2 == NULL){
+      if(debug) std :: cerr << "poset_add(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<"NULL" <<")\n";
+      if(debug) std :: cerr << "poset_add: invalid value1 (NULL)\n";
+      if(debug) std :: cerr << "poset_add: invalid value2 (NULL)\n";
+      return false;
+    }
     if(value1 == NULL) {
+      if(debug) std :: cerr << "poset_add(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<value2 <<")\n";
       if(debug) std :: cerr << "poset_add: invalid value1 (NULL)\n";
       return false;
     }
     if(value2 == NULL) {
+      if(debug) std :: cerr << "poset_add(\"" << id <<"\", \"" << value1 <<"\", \"" <<"NULL" <<")\n";
       if(debug) std :: cerr << "poset_add: invalid value2 (NULL)\n";
       return false;
     }
@@ -250,7 +258,7 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
     Key key2 = answ3->second;
 
     if (key1 == key2){
-      if(debug) std :: cerr << "poset_del: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be added\n";
+      if(debug) std :: cerr << "poset_add: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be added\n";
       return false;
     }
 
@@ -317,12 +325,20 @@ bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2
 }
 
 bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
+    if(value1 == NULL && value2 == NULL){
+      if(debug) std :: cerr << "poset_del(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<"NULL" <<")\n";
+      if(debug) std :: cerr << "poset_del: invalid value1 (NULL)\n";
+      if(debug) std :: cerr << "poset_del: invalid value2 (NULL)\n";
+      return false;
+    }
     if(value1 == NULL) {
-      if(debug) std :: cerr << "poset_add: invalid value1 (NULL)\n";
+      if(debug) std :: cerr << "poset_del(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<value2 <<")\n";
+      if(debug) std :: cerr << "poset_del: invalid value1 (NULL)\n";
       return false;
     }
     if(value2 == NULL) {
-      if(debug) std :: cerr << "poset_add: invalid value2 (NULL)\n";
+      if(debug) std :: cerr << "poset_del(\"" << id <<"\", \"" << value1 <<"\", \"" <<"NULL" <<")\n";
+      if(debug) std :: cerr << "poset_del: invalid value2 (NULL)\n";
       return false;
     }
     if(debug) std :: cerr << "poset_del(\"" << id <<"\", \"" << value1 <<"\", \"" <<value2 <<")\n";
@@ -395,13 +411,20 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
 }
 
 bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) {
+    if(value1 == NULL && value2 == NULL){
+      if(debug) std :: cerr << "poset_test(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<"NULL" <<")\n";
+      if(debug) std :: cerr << "poset_test: invalid value1 (NULL)\n";
+      if(debug) std :: cerr << "poset_test: invalid value2 (NULL)\n";
+    }
 
     if(value1 == NULL) {
-        if(debug) std :: cerr << "poset_add: invalid value1 (NULL)\n";
+        if(debug) std :: cerr << "poset_test(\"" << id <<"\", \"" << "NULL" <<"\", \"" <<value2 <<")\n";
+        if(debug) std :: cerr << "poset_test: invalid value1 (NULL)\n";
         return false;
     }
     if(value2 == NULL) {
-        if(debug) std :: cerr << "poset_add: invalid value2 (NULL)\n";
+        if(debug) std :: cerr << "poset_test(\"" << id <<"\", \"" << value1 <<"\", \"" <<"NULL" <<")\n";
+        if(debug) std :: cerr << "poset_test: invalid value2 (NULL)\n";
         return false;
     }
     if(debug) std :: cerr << "poset_test(\"" << id <<"\", \"" << value1 <<"\", \"" <<value2 <<")\n";

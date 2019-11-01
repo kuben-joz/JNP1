@@ -333,58 +333,37 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
     auto answ3 = nameMap.find(name2);
     if (answ3 == nameMap.end()) return false;
     Key key2 = answ3->second;
+    std :: cout << "keys resolved\n";
 
     auto &elem1 = elemMap[key1];
     auto answ4 = elem1.first.find(key2);
 
     auto &elem2 = elemMap[key2];
     auto answ5 = elem2.first.find(key1);
-    if (answ4 == elem1.first.end() && answ5 == elem2.first.end())
+
+    if (answ5 == elem1.first.end())
+        return false;
+    std :: cout << "inital checks done\n";
+
+    if (!isDetachable(elemMap, elem1, elem2, key1, key2))
         return false;
 
-    if (answ4 == elem1.first.end()) {//nie jest elem1 > elem2 => elem1 < elem2
-        if (!isDetachable(elemMap, elem1, elem2, key1, key2))
-            return false;
+    elem1.second.erase(key2);
+    for (const auto &upperElemKey: elem2.second) {
+      elem1.second.erase(upperElemKey);
+      elemMap[upperElemKey].first.emplace(key1);
+    }
 
-        elem1.second.erase(key2);
+    elem2.first.erase(key1);
+    for (const auto &upperElemKey: elem2.second) {
+      elem1.second.erase(upperElemKey);
+      elemMap[upperElemKey].first.emplace(key1);
+    }
+
+    for (const auto &lowerElemKey: elem1.first) {
         for (const auto &upperElemKey: elem2.second) {
-          elem1.second.erase(upperElemKey);
-          elemMap[upperElemKey].first.emplace(key1);
-        }
-
-        elem2.first.erase(key1);
-        for (const auto &upperElemKey: elem2.second) {
-          elem1.second.erase(upperElemKey);
-          elemMap[upperElemKey].first.emplace(key1);
-        }
-
-        for (const auto &lowerElemKey: elem1.first) {
-            for (const auto &upperElemKey: elem2.second) {
-                elemMap[lowerElemKey].second.erase(upperElemKey);
-                elemMap[upperElemKey].first.erase(lowerElemKey);
-            }
-        }
-    } else { //jest elem1 > elem2
-        if (!isDetachable(elemMap, elem2, elem1, key2, key1))
-            return false;
-
-        elem2.second.erase(key1);
-        for (const auto &upperElemKey: elem2.second) {
-          elem1.second.erase(upperElemKey);
-          elemMap[upperElemKey].first.emplace(key1);
-        }
-
-        elem1.first.erase(key2);
-        for (const auto &upperElemKey: elem2.second) {
-          elem1.second.erase(upperElemKey);
-          elemMap[upperElemKey].first.emplace(key1);
-        }
-
-        for (const auto &lowerElemKey: elem2.first) {
-            for (const auto &upperElemKey: elem1.second) {
-                elemMap[lowerElemKey].second.erase(upperElemKey);
-                elemMap[upperElemKey].first.erase(lowerElemKey);
-            }
+            elemMap[lowerElemKey].second.erase(upperElemKey);
+            elemMap[upperElemKey].first.erase(lowerElemKey);
         }
     }
     return true;
@@ -400,7 +379,6 @@ bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) 
     if(value1 == NULL || value2 == NULL) {
         return false;
     }
-
     //czy value1 < value2
     std::string name1(value1);
     std::string name2(value2);

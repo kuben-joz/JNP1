@@ -123,20 +123,6 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
   if(loopCheck(elemMap, elem1, elem2) == true)
     return false;
 
-  // for(const auto& lowerElemKey: elem1.first){
-  //   for(const auto& upperElemKey: elem2.second){
-  //     if(ElemMap[lowerElemKey]->first.find(upperElemKey)!=
-  //        ElemMap[lowerElemKey]->first.end())
-  //        return false;
-  //   }
-  // }
-
-  //iterate over set of smaller than elem1
-  //adding all bigger than elem2 as bigger
-
-  //iterate over set of bigger than elem2
-  //adding all smaller than elem1 as smaller
-
   elem1.second.emplace(key2);
   elem2.first.emplace(key1);
 
@@ -150,14 +136,12 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
   return true;
 }
 
-
 bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2){
   //only call for elem1 < elem2
   //a < b
   //w większych od każdego większego od a nie ma b
   //w mniejszych od każdego mniejszego od b nie ma a
 
-  //trzeba dodać elemMap ...
   for(const auto& kbigr1: elem1.second) {
     auto& bigr1 = elemMap[kbigr1];
     if(bigr1.second.find(key2) !=
@@ -191,10 +175,6 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
   if(answ3 == nameMap.end()) return false;
   Key key2 = answ3->second;
 
-  //jeżeli ~(a < b) ~(b < a)
-
-
-  //wśród większych od elem1
   auto& elem1 = elemMap[key1];
   auto answ4 = elem1.first.find(key2);
 
@@ -202,10 +182,6 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
   auto answ5 = elem2.first.find(key1);
   if(answ4 == elem1.first.end() && answ5 == elem2.first.end())
     return false;
-
-  //czyli jeżeli w mniejszych od a nie znajdzie się b
-  //oraz w mniejszych od b nie znajdzie się a
-
 
   if(answ4 == elem1.first.end()) {//nie jest elem1 > elem2 => elem1 < elem2
     if(!isDetachable(elemMap, elem1, elem2, key1, key2))
@@ -245,18 +221,18 @@ bool poset_test(unsigned long id, char const *value1, char const *value2) {
 
   auto answ1 = posets.find(id);
   if(answ1 == posets.end()) return false;
-  auto& ElemMap = answ1->second.first;
-  auto& NameMap = answ1->second.second;
+  auto& elemMap = answ1->second.first;
+  auto& nameMap = answ1->second.second;
 
-  auto answ2 = NameMap.find(name1);
-  if(answ2 == NameMap.end()) return false;
+  auto answ2 = nameMap.find(name1);
+  if(answ2 == nameMap.end()) return false;
   Key key1 = answ2->second;
 
-  auto answ3 = NameMap.find(name2);
-  if(answ3 == NameMap.end()) return false;
+  auto answ3 = nameMap.find(name2);
+  if(answ3 == nameMap.end()) return false;
   Key key2 = answ3->second;
 
-  auto& elem2 = ElemMap[key2];
+  auto& elem2 = elemMap[key2];
   auto answ5 = elem2.first.find(key1);
   if(answ5 != elem2.first.end()) return true;
   else return false;

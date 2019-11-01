@@ -1,243 +1,414 @@
 #include "poset.h"
+#include <unordered_map>
+#include <unordered_set>
+#include <cassert>
+#include <iostream>
 
-namespace jnpzad2{
-  using Key = uint64_t;
+#ifndef NDEBUG
+const bool debug = true;
+#else
+const bool debug = false;
+#endif
+
+
+using Key = uint64_t;
   using Smaller = std :: unordered_set<Key>;
   using Bigger = std :: unordered_set<Key>;
   using Elem = std :: pair<Smaller, Bigger>;
   using ElemMap = std :: unordered_map<Key, Elem>;
   using NameMap = std :: unordered_map<std :: string, Key>;
-  using Poset = std :: pair <ElemMap, NameMap>;
+  using PosetBody = std :: pair <ElemMap, NameMap>;
+  using PosetInternalCounter = Key;
+  using Poset = std :: pair <PosetBody, PosetInternalCounter>;
   using PosetContainerIndexType = unsigned long;
-}
 
-using namespace jnpzad2;
+/**
+ * TODO
+ * check all passes are by reference - done
+ * write tests for reference
+ * check
+ */
 
+////Could consider anonymous workspace instead
 static PosetContainerIndexType posetCounter = 0;
 //może trzymać referencje do posetów &poset
 //to zapasowy pomysł jeżeli kompilator będzie miał problem
 
-static std ::unordered_map<PosetContainerIndexType, Poset&> posets;
+static std ::unordered_map<PosetContainerIndexType, Poset> posets;
 
+void addElem(Poset &poset, std::string &name) {
+    assert(!poset.first.second.count(name));
+    ElemMap &tempElems = poset.first.first;
+    NameMap &tempNames = poset.first.second;
 
-Key hashString(const Poset& poset, const std :: string& name){
-    /*ElemMap tempElems = std :: get<0>(poset);
-    NameMap tempNames = std :: get<1>(poset);
     auto tempNameIter = tempNames.find(name);
-    if(tempNameIter == tempNames.end()) {
-        unsigned int counter = std :: get<2>(poset);
-        while((std :: get<0>(poset)).count(++counter));
-        return counter;
-        //add to ElemMap and NameMap here isntead of after exit
+
+    if (tempNameIter == tempNames.end()) {
+        PosetInternalCounter &counter = poset.second;
+        while (tempElems.count(++counter));
+        tempElems.emplace(counter, Elem{});
+        tempNames.emplace(name, counter);
     }
-    else return (*tempNameIter).second;
-    */
-    return 0;
 }
 
-void addElem(Poset& poset, std :: string& name){
-    Elem newElem;
-    Key key = hashString(poset, name);
-    poset.first[key] = newElem;
-    poset.second[name]= key;
-}
 
-unsigned long poset_new(void) {
-    //Could add protection for all long IDs being taken, by iterating once through long and then throwing exception
-    /*
+
+unsigned long jnp1::poset_new(void) {
+    if(debug) {
+        std::cerr << "poset_new()\n";
+    }
     while (posets.count(++posetCounter));
-    posets.emplace(std :: make_pair(posetCounter, Poset{ElemMap{make_pair(Key{}, Elem{})}, NameMap{}, 0}));
+    posets.emplace(posetCounter, Poset{});
+    assert(posets.count(posetCounter));
+    if(debug) {
+        std :: cerr << "poset_new: created poset with id " << posetCounter << "\n";
+    }
     return posetCounter;
-    */
-    return 0;
-}
-void poset_delete(unsigned long id) {
-  //TODO
-  return;
 }
 
-size_t poset_size(unsigned long id) {
-  auto answ1 = posets.find(id);
-  if(answ1 == posets.end()) return 0;
-  Poset& poset = answ1->second;
-  return (size_t) poset.first.size();
+void jnp1::poset_delete(const PosetContainerIndexType id) {
+    if(debug) {
+        std::cerr << "poset_delete(" << id << ")\n";
+    }
+    auto toDelete = posets.find(id);
+    if (toDelete != posets.end()) {
+        posets.erase(toDelete);
+        if(debug) {
+            std::cerr << "poset_delete: poset " << id << " deleted\n";
+        }
+    }
+    else if(debug){ //toDelete == posets.end()
+        std :: cerr << "poset_delete: poset " << id << " not found\n";
+    }
 }
 
-bool poset_insert(unsigned long id, char const *value) {
-  std :: string name (value);
-  auto answ1 = posets.find(id);
-  if(answ1 == posets.end()) return false;
-  auto& poset = answ1->second;
-  auto answ2 = poset.second.find(name);
-  if(answ2 == poset.second.end()) {
-    addElem(poset, name);
+size_t jnp1::poset_size(const PosetContainerIndexType id) {
+    if(debug) {
+        std::cerr << "poset_size(" << id << ")\n";
+    }
+    auto answ1 = posets.find(id);
+    if (answ1 == posets.end()) {
+        if(debug) {
+            std::cerr << "poset_size: poset " << id << " not found\n";
+        }
+        return 0;
+    }
+    if(debug) {
+        std::cerr << "poset_size: found poset " << id << " of size " << (*answ1).second.first.second.size() << "\n";
+    }
+    return (*answ1).second.first.second.size();
+}
+
+bool jnp1::poset_insert(const PosetContainerIndexType id, char const *value) {
+    if(value == NULL) {
+        if(debug) {
+            std::cerr << "poset_insert(" << id << ", NULL)\n";
+            std::cerr << "poset_insert: Illegal value (NULL)\n";
+        }
+        return false;
+    }
+    std::string name(value);
+    if(debug) {
+        std::cerr << "poset_insert(" << id << ", " << name << ")\n";
+    }
+    auto answ1 = posets.find(id);
+    if (answ1 == posets.end()) {
+        if(debug) {
+            std::cerr << "poset_insert: poset " << id << " not found\n";
+        }
+        return false;
+    }
+    Poset& poset = answ1->second;
+    auto answ2 = poset.first.second.find(name);
+    if (answ2 == poset.first.second.end()) {
+        addElem(poset, name);
+        if(debug) {
+            std::cerr << "poset_insert: value " << name << " successfully added to poset\n";
+        }
+        return true;
+    }
+    if(debug) {
+        std::cerr << "poset_insert: poset " << id <<
+        " already contains value " << name << "\n";
+    }
+    return false;
+}
+
+bool jnp1::poset_remove(const unsigned long id, char const *value) {
+    if(value == NULL) {
+        if (debug) {
+            std::cerr << "poset_remove(" << id << ", " << "NULL)\n";
+            std::cerr << "poset_remove: invalid value (NULL)\n";
+        }
+        return false;
+
+    }
+
+    std::string valueString(value);
+    if (debug) {
+        std::cerr << "poset_remove(" << id << ", " << valueString <<")\n";
+    }
+
+    std::unordered_map<PosetContainerIndexType, Poset>::iterator posetsIt = posets.find(id);
+    if (posetsIt == posets.end()) {
+        if(debug) {
+            std::cerr << "poset_remove: poset " << id << " not found\n";
+        }
+        return false;
+
+    }
+    PosetBody &currentPosetBody = (*posetsIt).second.first;
+    NameMap::const_iterator nameMapIt = currentPosetBody.second.find(valueString);
+    if (nameMapIt == currentPosetBody.second.end()) {
+        if(debug) {
+            std::cerr << "poset_remove: poset " << id << " does not contain value " << valueString << "\n";
+        }
+        return false;
+    }
+
+    const Key keyToRemove = (*nameMapIt).second;
+    ElemMap::iterator elemMapIt = currentPosetBody.first.find(keyToRemove);
+    // Asserts iff an element that was in NameMap is also present in ElemMap,
+    // which is an invariant of PosetBody
+    assert(elemMapIt != currentPosetBody.first.end());
+    Elem &relations = (*elemMapIt).second;
+
+    Smaller::const_iterator smallerIt = relations.first.begin();
+    while (smallerIt != relations.first.end()) {
+        Key tempKey = *smallerIt++;
+        Elem &tempElem = (*currentPosetBody.first.find(tempKey)).second;
+        // Asserts that a < b -> b > a
+        assert(tempElem.second.count(tempKey));
+        tempElem.second.erase(keyToRemove);
+    }
+
+    Bigger::const_iterator biggerIt = relations.second.begin();
+    while (biggerIt != relations.second.end()) {
+        Key tempKey = *biggerIt++;
+        Elem &tempElem = (*currentPosetBody.first.find(tempKey)).second;
+        // Asserts that b > a -> a < b
+        assert(tempElem.second.count(tempKey));
+        tempElem.first.erase(keyToRemove);
+    }
+
+    currentPosetBody.first.erase(keyToRemove);
+    currentPosetBody.second.erase(valueString);
+
+    if(debug) {
+        std::cerr << "poset_remove: value " << valueString << " has been removed from poset " << id << "\n";
+    }
+
     return true;
-  }
-  return false;
 }
 
-bool poset_remove(unsigned long id, char const *value) {
-  //TODO
-  return true;
-}
-
-bool loopCheck(ElemMap& elemMap, Elem &elem1, Elem &elem2){
-  for(const auto& lowerElemKey: elem1.first){
-    for(const auto& upperElemKey: elem2.second){
-      if(elemMap[lowerElemKey].first.find(upperElemKey)!=
-         elemMap[lowerElemKey].first.end())
-         return true;
+//// assertions finished here
+bool loopCheck(ElemMap &elemMap, Elem &elem1, Elem &elem2) {
+    for (const auto &lowerElemKey: elem1.first) {
+        for (const auto &upperElemKey: elem2.second) {
+            if (elemMap[lowerElemKey].first.find(upperElemKey) !=
+                elemMap[lowerElemKey].first.end())
+                return true;
+        }
     }
-  }
-  return false;
-}
-
-bool poset_add(unsigned long id, char const *value1, char const *value2) {
-  //value1 < value2
-  std :: string name1 (value1);
-  std :: string name2 (value2);
-
-  auto answ1 = posets.find(id);
-  if(answ1 == posets.end()) return false;
-  auto& elemMap = answ1->second.first;
-  auto& nameMap = answ1->second.second;
-
-  auto answ2 = nameMap.find(name1);
-  if(answ2 == nameMap.end()) return false;
-  Key key1 = answ2->second;
-
-  auto answ3 = nameMap.find(name2);
-  if(answ3 == nameMap.end()) return false;
-  Key key2 = answ3->second;
-
-  auto& elem1 = elemMap[key1];
-  auto answ4 = elem1.first.find(key2);
-  if(answ4 != elem1.first.end()) return false;
-
-  auto& elem2 = elemMap[key2];
-  auto answ5 = elem2.first.find(key1);
-  if(answ5 != elem2.first.end()) return false;
-
-  //check if adding an edge would result in a loop
-
-  if(loopCheck(elemMap, elem1, elem2) == true)
     return false;
+}
 
-  elem1.second.emplace(key2);
-  elem2.first.emplace(key1);
+bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
 
-  for(const auto& lowerElemKey: elem1.first){
-    for(const auto& upperElemKey: elem2.second){
-      elemMap[lowerElemKey].second.emplace(upperElemKey);
-      elemMap[upperElemKey].first.emplace(lowerElemKey);
+    if(value1 == NULL || value2 == NULL) {
+        return false;
     }
-  }
+    //value1 < value2
+    std::string name1(value1);
+    std::string name2(value2);
 
-  return true;
-}
+    auto answ1 = posets.find(id);
+    if (answ1 == posets.end()) return false;
+    auto &elemMap = answ1->second.first.first; //dlaczego &
+    auto &nameMap = answ1->second.first.second; //dlaczego &
 
-bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2){
-  //only call for elem1 < elem2
-  //a < b
-  //w większych od każdego większego od a nie ma b
-  //w mniejszych od każdego mniejszego od b nie ma a
+    auto answ2 = nameMap.find(name1);
+    if (answ2 == nameMap.end()) return false;
+    Key key1 = answ2->second;
 
-  for(const auto& kbigr1: elem1.second) {
-    auto& bigr1 = elemMap[kbigr1];
-    if(bigr1.second.find(key2) !=
-       bigr1.second.end())
-      return false;
-  }
+    auto answ3 = nameMap.find(name2);
+    if (answ3 == nameMap.end()) return false;
+    Key key2 = answ3->second;
 
-  for(const auto& ksmalr2: elem2.first){
-    auto& smalr2 = elemMap[ksmalr2];
-    if(smalr2.first.find(key1) != smalr2.first.end())
-      return false;
-  }
+    auto &elem1 = elemMap[key1];
+    auto answ4 = elem1.first.find(key2);
+    if (answ4 != elem1.first.end()) return false;
 
-  return true;
-}
+    auto &elem2 = elemMap[key2];
+    auto answ5 = elem2.first.find(key1);
+    if (answ5 != elem2.first.end()) return false;
 
-bool poset_del(unsigned long id, char const *value1, char const *value2) {
-  std :: string name1 (value1);
-  std :: string name2 (value2);
+    //check if adding an edge would result in a loop
 
-  auto answ1 = posets.find(id);
-  if(answ1 == posets.end()) return false;
-  auto& elemMap = answ1->second.first;
-  auto& nameMap = answ1->second.second;
+    if (loopCheck(elemMap, elem1, elem2) == true)
+        return false;
 
-  auto answ2 = nameMap.find(name1);
-  if(answ2 == nameMap.end()) return false;
-  Key key1 = answ2->second;
+    // for(const auto& lowerElemKey: elem1.first){
+    //   for(const auto& upperElemKey: elem2.second){
+    //     if(ElemMap[lowerElemKey]->first.find(upperElemKey)!=
+    //        ElemMap[lowerElemKey]->first.end())
+    //        return false;
+    //   }
+    // }
 
-  auto answ3 = nameMap.find(name2);
-  if(answ3 == nameMap.end()) return false;
-  Key key2 = answ3->second;
+    //iterate over set of smaller than elem1
+    //adding all bigger than elem2 as bigger
 
-  auto& elem1 = elemMap[key1];
-  auto answ4 = elem1.first.find(key2);
+    //iterate over set of bigger than elem2
+    //adding all smaller than elem1 as smaller
 
-  auto& elem2 = elemMap[key2];
-  auto answ5 = elem2.first.find(key1);
-  if(answ4 == elem1.first.end() && answ5 == elem2.first.end())
-    return false;
+    elem1.second.emplace(key2);
+    elem2.first.emplace(key1);
 
-  if(answ4 == elem1.first.end()) {//nie jest elem1 > elem2 => elem1 < elem2
-    if(!isDetachable(elemMap, elem1, elem2, key1, key2))
-      return false;
-
-    elem1.second.erase(key2);
-    elem2.first.erase(key1);
-
-    for(const auto& lowerElemKey: elem1.first){
-      for(const auto& upperElemKey: elem2.second){
-        elemMap[lowerElemKey].second.erase(upperElemKey);
-        elemMap[upperElemKey].first.erase(lowerElemKey);
-      }
+    for (const auto &lowerElemKey: elem1.first) {
+        for (const auto &upperElemKey: elem2.second) {
+            elemMap[lowerElemKey].second.emplace(upperElemKey);
+            elemMap[upperElemKey].first.emplace(lowerElemKey);
+        }
     }
-  }
-  else { //jest elem1 > elem2
-    if(!isDetachable(elemMap, elem2, elem1, key2, key1))
-      return false;
 
-    elem2.second.erase(key1);
-    elem1.first.erase(key2);
+    return true;
+}
 
-    for(const auto& lowerElemKey: elem2.first){
-      for(const auto& upperElemKey: elem1.second){
-        elemMap[lowerElemKey].second.erase(upperElemKey);
-        elemMap[upperElemKey].first.erase(lowerElemKey);
-      }
+
+bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2) {
+    //only call for elem1 < elem2
+    //a < b
+    //w większych od każdego większego od a nie ma b
+    //w mniejszych od każdego mniejszego od b nie ma a
+
+    //trzeba dodać elemMap ...
+    for (const auto &kbigr1 : elem1.second) {
+        auto &bigr1 = elemMap[kbigr1];
+        if (bigr1.second.find(key2) !=
+            bigr1.second.end())
+            return false;
     }
-  }
-  return true;
+
+    for (const auto &ksmalr2 : elem2.first) {
+        auto &smalr2 = elemMap[ksmalr2];
+        if (smalr2.first.find(key1) != smalr2.first.end())
+            return false;
+    }
+
+    return true;
 }
 
-bool poset_test(unsigned long id, char const *value1, char const *value2) {
-  //czy value1 < value2
-  std :: string name1 (value1);
-  std :: string name2 (value2);
+bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
+    if(value1 == NULL || value2 == NULL) {
+        return false;
+    }
+    std::string name1(value1);
+    std::string name2(value2);
 
-  auto answ1 = posets.find(id);
-  if(answ1 == posets.end()) return false;
-  auto& elemMap = answ1->second.first;
-  auto& nameMap = answ1->second.second;
+    auto answ1 = posets.find(id);
+    if (answ1 == posets.end()) return false;
+    auto &elemMap = (*answ1).second.first.first;
+    auto &nameMap = (*answ1).second.first.second;
 
-  auto answ2 = nameMap.find(name1);
-  if(answ2 == nameMap.end()) return false;
-  Key key1 = answ2->second;
+    auto answ2 = nameMap.find(name1);
+    if (answ2 == nameMap.end()) return false;
+    Key key1 = answ2->second;
 
-  auto answ3 = nameMap.find(name2);
-  if(answ3 == nameMap.end()) return false;
-  Key key2 = answ3->second;
+    auto answ3 = nameMap.find(name2);
+    if (answ3 == nameMap.end()) return false;
+    Key key2 = answ3->second;
 
-  auto& elem2 = elemMap[key2];
-  auto answ5 = elem2.first.find(key1);
-  if(answ5 != elem2.first.end()) return true;
-  else return false;
+    auto &elem1 = elemMap[key1];
+    auto answ4 = elem1.first.find(key2);
+
+    auto &elem2 = elemMap[key2];
+    auto answ5 = elem2.first.find(key1);
+    if (answ4 == elem1.first.end() && answ5 == elem2.first.end())
+        return false;
+
+    if (answ4 == elem1.first.end()) {//nie jest elem1 > elem2 => elem1 < elem2
+        if (!isDetachable(elemMap, elem1, elem2, key1, key2))
+            return false;
+
+        elem1.second.erase(key2);
+        elem2.first.erase(key1);
+
+        for (const auto &lowerElemKey: elem1.first) {
+            for (const auto &upperElemKey: elem2.second) {
+                elemMap[lowerElemKey].second.erase(upperElemKey);
+                elemMap[upperElemKey].first.erase(lowerElemKey);
+            }
+        }
+    } else { //jest elem1 > elem2
+        if (!isDetachable(elemMap, elem2, elem1, key2, key1))
+            return false;
+
+        elem2.second.erase(key1);
+        elem1.first.erase(key2);
+
+        for (const auto &lowerElemKey: elem2.first) {
+            for (const auto &upperElemKey: elem1.second) {
+                elemMap[lowerElemKey].second.erase(upperElemKey);
+                elemMap[upperElemKey].first.erase(lowerElemKey);
+            }
+        }
+    }
+    return true;
 }
 
-void poset_clear(unsigned long id) {
-  //TODO
+/*
+ * TODO
+ * make sure realtions are present, transitivty not working
+ */
+
+bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) {
+
+    if(value1 == NULL || value2 == NULL) {
+        return false;
+    }
+
+    //czy value1 < value2Successful compilation and linking
+    std::string name1(value1);
+    std::string name2(value2);
+
+    auto answ1 = posets.find(id);
+    if (answ1 == posets.end()) return false;
+    auto &elemMap = (*answ1).second.first.first;
+    auto &nameMap = (*answ1).second.first.second;
+
+    auto answ2 = nameMap.find(name1);
+    if (answ2 == nameMap.end()) return false;
+    Key key1 = answ2->second;
+
+    auto answ3 = nameMap.find(name2);
+    if (answ3 == nameMap.end()) return false;
+    Key key2 = answ3->second;
+
+    auto &elem2 = elemMap[key2];
+    auto answ5 = elem2.first.find(key1);
+    if (answ5 != elem2.first.end()) return true;
+    else return false;
 }
+
+
+void jnp1::poset_clear(unsigned long id) {
+    if(debug) {
+        std::cerr << "poset_clear(" << id << ")\n";
+    }
+    auto posetsIt = posets.find(id);
+    if (posetsIt == posets.end()) {
+        if(debug) {
+            std::cerr << "poset_clear: poset " << id << " not found\n";
+        }
+    }
+    else {
+        (*posetsIt).second.first.first.clear();
+        (*posetsIt).second.first.second.clear();
+        if(debug) {
+            std::cerr << "poset_clear: poset " << id << " has been cleared\n";
+        }
+    }
+
+}
+

@@ -107,6 +107,10 @@ g++ poset_example2.o poset.o -o poset_example2
 Rozwiązanie powinno zawierać pliki poset.h, poset.cc, które należy umieścić
 w repozytorium w katalogu
 
+g++ -Wall -Wextra -O2 -std=c++17 -c poset.cc -o poset.o
+gcc -Wall -Wextra -O2 -std=c11 -c ctest.c -o ctest.o
+g++ ctest.o poset.o -o ctest
+
 grupaN/zadanie2/ab123456+cd123456
 
 lub

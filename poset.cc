@@ -10,7 +10,6 @@ const bool debug = true;
 const bool debug = false;
 #endif
 
-
 using Key = uint64_t;
   using Smaller = std :: unordered_set<Key>;
   using Bigger = std :: unordered_set<Key>;
@@ -47,6 +46,8 @@ void addElem(Poset &poset, std::string &name) {
         PosetInternalCounter &counter = poset.second;
         while (tempElems.count(++counter));
         tempElems.emplace(counter, Elem{});
+        //tempElems[counter].first.emplace(counter);
+        //tempElems[counter].second.emplace(counter);
         tempNames.emplace(name, counter);
     }
 }
@@ -207,6 +208,10 @@ bool loopCheck(ElemMap &elemMap, Elem &elem1, Elem &elem2) {
         for (const auto &upperElemKey: elem2.second) {
             if (elemMap[lowerElemKey].first.find(upperElemKey) !=
                 elemMap[lowerElemKey].first.end())
+                if(debug){
+                  std::cerr << "loopCheck : found loop";
+                }
+                std :: cout << lowerElemKey << " " << upperElemKey << "\n";
                 return true;
         }
     }
@@ -224,8 +229,8 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
 
     auto answ1 = posets.find(id);
     if (answ1 == posets.end()) return false;
-    auto &elemMap = answ1->second.first.first; //dlaczego &
-    auto &nameMap = answ1->second.first.second; //dlaczego &
+    auto &elemMap = answ1->second.first.first; //dlaczego & żeby nie kopiować
+    auto &nameMap = answ1->second.first.second; //dlaczego &  całego mapa
 
     auto answ2 = nameMap.find(name1);
     if (answ2 == nameMap.end()) return false;
@@ -235,6 +240,8 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
     if (answ3 == nameMap.end()) return false;
     Key key2 = answ3->second;
 
+    std :: cout <<"NAMES RESOLVED\n";
+
     auto &elem1 = elemMap[key1];
     auto answ4 = elem1.first.find(key2);
     if (answ4 != elem1.first.end()) return false;
@@ -243,32 +250,40 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
     auto answ5 = elem2.first.find(key1);
     if (answ5 != elem2.first.end()) return false;
 
+    std :: cout <<"ELEMENTS FOUND IN POSETS\n";
+
     //check if adding an edge would result in a loop
 
     if (loopCheck(elemMap, elem1, elem2) == true)
         return false;
 
-    // for(const auto& lowerElemKey: elem1.first){
-    //   for(const auto& upperElemKey: elem2.second){
-    //     if(ElemMap[lowerElemKey]->first.find(upperElemKey)!=
-    //        ElemMap[lowerElemKey]->first.end())
-    //        return false;
-    //   }
-    // }
 
-    //iterate over set of smaller than elem1
-    //adding all bigger than elem2 as bigger
-
-    //iterate over set of bigger than elem2
-    //adding all smaller than elem1 as smaller
+    std :: cout <<"LOOP CHECK DONE\n";
 
     elem1.second.emplace(key2);
+
+    for (const auto &upperElemKey: elem2.second) {
+      elem1.second.emplace(upperElemKey);
+      elemMap[upperElemKey].first.emplace(key1);
+    }
+
     elem2.first.emplace(key1);
+
+    for (const auto &lowerElemKey: elem1.first) {
+      elem2.first.emplace(lowerElemKey);
+      elemMap[lowerElemKey].second.emplace(key1);
+    }
+
+    std :: cout << "CALL KEYS " << key1<< " " << key2 << "\n";
+
+    //element should be in smaller bigger set of itself
+    //it solves a lot of problems
 
     for (const auto &lowerElemKey: elem1.first) {
         for (const auto &upperElemKey: elem2.second) {
             elemMap[lowerElemKey].second.emplace(upperElemKey);
             elemMap[upperElemKey].first.emplace(lowerElemKey);
+            std :: cout << "OP KEYS " << key1<< " " << key2 << "\n";
         }
     }
 
@@ -332,7 +347,16 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
             return false;
 
         elem1.second.erase(key2);
+        for (const auto &upperElemKey: elem2.second) {
+          elem1.second.erase(upperElemKey);
+          elemMap[upperElemKey].first.emplace(key1);
+        }
+
         elem2.first.erase(key1);
+        for (const auto &upperElemKey: elem2.second) {
+          elem1.second.erase(upperElemKey);
+          elemMap[upperElemKey].first.emplace(key1);
+        }
 
         for (const auto &lowerElemKey: elem1.first) {
             for (const auto &upperElemKey: elem2.second) {
@@ -345,7 +369,16 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
             return false;
 
         elem2.second.erase(key1);
+        for (const auto &upperElemKey: elem2.second) {
+          elem1.second.erase(upperElemKey);
+          elemMap[upperElemKey].first.emplace(key1);
+        }
+
         elem1.first.erase(key2);
+        for (const auto &upperElemKey: elem2.second) {
+          elem1.second.erase(upperElemKey);
+          elemMap[upperElemKey].first.emplace(key1);
+        }
 
         for (const auto &lowerElemKey: elem2.first) {
             for (const auto &upperElemKey: elem1.second) {
@@ -368,7 +401,7 @@ bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) 
         return false;
     }
 
-    //czy value1 < value2Successful compilation and linking
+    //czy value1 < value2
     std::string name1(value1);
     std::string name2(value2);
 
@@ -411,4 +444,3 @@ void jnp1::poset_clear(unsigned long id) {
     }
 
 }
-

@@ -211,7 +211,6 @@ bool loopCheck(ElemMap &elemMap, Elem &elem1, Elem &elem2) {
                 if(debug){
                   std::cerr << "loopCheck : found loop";
                 }
-                std :: cout << lowerElemKey << " " << upperElemKey << "\n";
                 return true;
         }
     }
@@ -240,8 +239,6 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
     if (answ3 == nameMap.end()) return false;
     Key key2 = answ3->second;
 
-    std :: cout <<"NAMES RESOLVED\n";
-
     auto &elem1 = elemMap[key1];
     auto answ4 = elem1.first.find(key2);
     if (answ4 != elem1.first.end()) return false;
@@ -250,15 +247,10 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
     auto answ5 = elem2.first.find(key1);
     if (answ5 != elem2.first.end()) return false;
 
-    std :: cout <<"ELEMENTS FOUND IN POSETS\n";
-
     //check if adding an edge would result in a loop
 
     if (loopCheck(elemMap, elem1, elem2) == true)
         return false;
-
-
-    std :: cout <<"LOOP CHECK DONE\n";
 
     elem1.second.emplace(key2);
 
@@ -274,8 +266,6 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
       elemMap[lowerElemKey].second.emplace(key1);
     }
 
-    std :: cout << "CALL KEYS " << key1<< " " << key2 << "\n";
-
     //element should be in smaller bigger set of itself
     //it solves a lot of problems
 
@@ -283,7 +273,6 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
         for (const auto &upperElemKey: elem2.second) {
             elemMap[lowerElemKey].second.emplace(upperElemKey);
             elemMap[upperElemKey].first.emplace(lowerElemKey);
-            std :: cout << "OP KEYS " << key1<< " " << key2 << "\n";
         }
     }
 
@@ -333,7 +322,6 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
     auto answ3 = nameMap.find(name2);
     if (answ3 == nameMap.end()) return false;
     Key key2 = answ3->second;
-    std :: cout << "keys resolved\n";
 
     auto &elem1 = elemMap[key1];
     auto answ4 = elem1.first.find(key2);
@@ -343,7 +331,6 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
 
     if (answ5 == elem1.first.end())
         return false;
-    std :: cout << "inital checks done\n";
 
     if (!isDetachable(elemMap, elem1, elem2, key1, key2))
         return false;

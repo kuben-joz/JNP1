@@ -423,6 +423,7 @@ bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) 
 
     auto &elem2 = elemMap[key2];
     auto answ5 = elem2.first.find(key1);
+    if(key1 == key2) return true;
     if (answ5 != elem2.first.end()) return true;
     else return false;
 }

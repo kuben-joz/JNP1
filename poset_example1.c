@@ -14,7 +14,7 @@ int main() {
     assert(poset_size(p1 + 1) == 0);
     assert(!poset_insert(p1, NULL));
     assert(poset_insert(p1, "A"));
-    //assert(poset_test(p1, "A", "A"));
+    assert(poset_test(p1, "A", "A"));
     assert(!poset_insert(p1, "A"));
     assert(!poset_insert(p1 + 1, "B"));
     assert(poset_size(p1) == 1);
@@ -67,4 +67,3 @@ int main() {
 
     return 0;
 }
-

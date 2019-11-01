@@ -218,39 +218,60 @@ bool loopCheck(ElemMap &elemMap, Elem &elem1, Elem &elem2) {
 }
 
 bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
-
-    if(value1 == NULL || value2 == NULL) {
-        return false;
+    if(value1 == NULL) {
+      if(debug) std :: cerr << "poset_add: invalid value1 (NULL)\n";
+      return false;
     }
+    if(value2 == NULL) {
+      if(debug) std :: cerr << "poset_add: invalid value2 (NULL)\n";
+      return false;
+    }
+    if(debug) std :: cerr << "poset_add(\"" << id <<"\", \"" << value1 <<"\", \"" <<value2 <<")\n";
     //value1 < value2
     std::string name1(value1);
     std::string name2(value2);
 
     auto answ1 = posets.find(id);
-    if (answ1 == posets.end()) return false;
+    if (answ1 == posets.end()){
+      if(debug) std :: cerr << "poset_add: poset " << id << " does not exist\n";
+      return false;
+    }
     auto &elemMap = answ1->second.first.first; //dlaczego & żeby nie kopiować
     auto &nameMap = answ1->second.first.second; //dlaczego &  całego mapa
 
     auto answ2 = nameMap.find(name1);
-    if (answ2 == nameMap.end()) return false;
+    if (answ2 == nameMap.end()){
+      if(debug) std :: cerr << "poset_add: element \"" << name1 << "\" or \" " << name2 << "\" does not exist\n";
+      return false;
+    }
     Key key1 = answ2->second;
 
     auto answ3 = nameMap.find(name2);
-    if (answ3 == nameMap.end()) return false;
+    if (answ3 == nameMap.end()){
+      if(debug) std :: cerr << "poset_add: element \"" << name1 << "\" or \" " << name2 << "\" does not exist\n";
+      return false;
+    }
     Key key2 = answ3->second;
 
     auto &elem1 = elemMap[key1];
     auto answ4 = elem1.first.find(key2);
-    if (answ4 != elem1.first.end()) return false;
+    if (answ4 != elem1.first.end()){
+      if(debug) std :: cerr << "poset_add: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be added\n";
+      return false;
+    }
 
     auto &elem2 = elemMap[key2];
     auto answ5 = elem2.first.find(key1);
-    if (answ5 != elem2.first.end()) return false;
-
+    if (answ5 != elem2.first.end()) {
+      if(debug) std :: cerr << "poset_add: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be added\n";
+      return false;
+    }
     //check if adding an edge would result in a loop
 
-    if (loopCheck(elemMap, elem1, elem2) == true)
-        return false;
+    if (loopCheck(elemMap, elem1, elem2) == true){
+      if(debug) std :: cerr << "poset_add: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be added\n";
+      return false;
+    }
 
     elem1.second.emplace(key2);
 
@@ -265,9 +286,6 @@ bool jnp1::poset_add(unsigned long id, char const *value1, char const *value2) {
       elem2.first.emplace(lowerElemKey);
       elemMap[lowerElemKey].second.emplace(key1);
     }
-
-    //element should be in smaller bigger set of itself
-    //it solves a lot of problems
 
     for (const auto &lowerElemKey: elem1.first) {
         for (const auto &upperElemKey: elem2.second) {
@@ -304,23 +322,39 @@ bool isDetachable(ElemMap &elemMap, Elem &elem1, Elem &elem2, Key key1, Key key2
 }
 
 bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
-    if(value1 == NULL || value2 == NULL) {
-        return false;
+    if(value1 == NULL) {
+      if(debug) std :: cerr << "poset_add: invalid value1 (NULL)\n";
+      return false;
     }
+    if(value2 == NULL) {
+      if(debug) std :: cerr << "poset_add: invalid value2 (NULL)\n";
+      return false;
+    }
+    if(debug) std :: cerr << "poset_del(\"" << id <<"\", \"" << value1 <<"\", \"" <<value2 <<")\n";
+
     std::string name1(value1);
     std::string name2(value2);
 
     auto answ1 = posets.find(id);
-    if (answ1 == posets.end()) return false;
+    if (answ1 == posets.end()) {
+      if(debug) std :: cerr << "poset_del: poset " << id << " does not exist\n";
+      return false;
+    }
     auto &elemMap = (*answ1).second.first.first;
     auto &nameMap = (*answ1).second.first.second;
 
     auto answ2 = nameMap.find(name1);
-    if (answ2 == nameMap.end()) return false;
+    if (answ2 == nameMap.end()) {
+      if(debug) std :: cerr << "poset_del: element \"" << name1 << "\" or \" " << name2 << "\" does not exist\n";
+      return false;
+    }
     Key key1 = answ2->second;
 
     auto answ3 = nameMap.find(name2);
-    if (answ3 == nameMap.end()) return false;
+    if (answ3 == nameMap.end()) {
+      if(debug) std :: cerr << "poset_del: element \"" << name1 << "\" or \" " << name2 << "\" does not exist\n";
+      return false;
+    }
     Key key2 = answ3->second;
 
     auto &elem1 = elemMap[key1];
@@ -329,11 +363,15 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
     auto &elem2 = elemMap[key2];
     auto answ5 = elem2.first.find(key1);
 
-    if (answ5 == elem1.first.end())
-        return false;
+    if (answ5 == elem1.first.end()){
+      if(debug) std :: cerr << "poset_del: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be deleted\n";
+      return false;
+    }
 
-    if (!isDetachable(elemMap, elem1, elem2, key1, key2))
-        return false;
+    if (!isDetachable(elemMap, elem1, elem2, key1, key2)){
+      if(debug) std :: cerr << "poset_del: poset " << id <<", relation (\"" << name1 <<"\", \"" << name2 <<"\") cannot be deleted\n";
+      return false;
+    }
 
     elem1.second.erase(key2);
     for (const auto &upperElemKey: elem2.second) {
@@ -363,24 +401,39 @@ bool jnp1::poset_del(unsigned long id, char const *value1, char const *value2) {
 
 bool jnp1::poset_test(unsigned long id, char const *value1, char const *value2) {
 
-    if(value1 == NULL || value2 == NULL) {
+    if(value1 == NULL) {
+        if(debug) std :: cerr << "poset_add: invalid value1 (NULL)\n";
         return false;
     }
+    if(value2 == NULL) {
+        if(debug) std :: cerr << "poset_add: invalid value2 (NULL)\n";
+        return false;
+    }
+    if(debug) std :: cerr << "poset_test(\"" << id <<"\", \"" << value1 <<"\", \"" <<value2 <<")\n";
     //czy value1 < value2
     std::string name1(value1);
     std::string name2(value2);
 
     auto answ1 = posets.find(id);
-    if (answ1 == posets.end()) return false;
+    if (answ1 == posets.end()) {
+      if(debug) std :: cerr << "poset_test: poset " << id << " does not exist\n";
+      return false;
+    }
     auto &elemMap = (*answ1).second.first.first;
     auto &nameMap = (*answ1).second.first.second;
 
     auto answ2 = nameMap.find(name1);
-    if (answ2 == nameMap.end()) return false;
+    if (answ2 == nameMap.end()) {
+      if(debug) std :: cerr << "poset_test: element \"" << name1 << "\" or \" " << name2 << "\" does not exist\n";
+      return false;
+    }
     Key key1 = answ2->second;
 
     auto answ3 = nameMap.find(name2);
-    if (answ3 == nameMap.end()) return false;
+    if (answ3 == nameMap.end()){
+      if(debug) std :: cerr << "poset_test: element \"" << name1 << "\" or \" " << name2 << "\" does not exist\n";
+      return false;
+     }
     Key key2 = answ3->second;
 
     auto &elem2 = elemMap[key2];
